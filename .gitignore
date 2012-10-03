@@ -11,5 +11,8 @@
 *.la
 *.a
 
+# Executables
+*.out
+
 # Apple
 .DS_Store
