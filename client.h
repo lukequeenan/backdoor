@@ -1,7 +1,6 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <libnet.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
