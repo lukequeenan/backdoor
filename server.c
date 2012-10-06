@@ -10,33 +10,36 @@ int main (int argc, char *argv[])
     bpf_u_int32 mask;
     pcap_if_t *nics;
     pcap_if_t *nic;
-    struct AddrInfo *Addr_Ptr;
+    struct AddrInfo *addr;
     int opt;
-    time_t t;    struct tm* tm;
+    time_t t;
+    struct tm* tm;
     char Date[11];
     char *encryptedField;
 
     time(&t);
     tm = localtime(&t);
     
+    addr = malloc(sizeof(struct AddrInfo));
+    
     while ((opt = getopt (argc, argv, OPTIONS)) != -1)
     {
         switch (opt)
         {
             case 'h':
-                Addr_Ptr->SrcHost = optarg;
+                addr->SrcHost = optarg;
                 break;
                 
             case 'd':
-                Addr_Ptr->DstHost = optarg;		// Destination Host name
+                addr->DstHost = optarg;		// Destination Host name
                 break;
                 
             case 'p':
-                Addr_Ptr->dport = atoi (optarg);
+                addr->dport = atoi (optarg);
                 break;
                 
             case 's':
-                Addr_Ptr->sport = atoi (optarg);
+                addr->sport = atoi (optarg);
                 break;
                 
             case 'c':
@@ -90,8 +93,8 @@ int main (int argc, char *argv[])
 
     /* Make the new UDP header */
     ptag = libnet_build_udp(
-                            htons(Addr_Ptr->sport),    /* source port */
-                            htons(Addr_Ptr->dport),    /* destination port */
+                            htons(addr->sport),    /* source port */
+                            htons(addr->dport),    /* destination port */
                             32,           /* packet size */
                             0,            /* checksum */
                             NULL,         /* payload */
@@ -118,8 +121,8 @@ int main (int argc, char *argv[])
                              64,                                         /* TTL */
                              IPPROTO_UDP,                                /* protocol */
                              0,                                          /* checksum */
-                             *(Addr_Ptr->SrcHost),                                   /* source IP */
-                             *(Addr_Ptr->DstHost),                              /* destination IP */
+                             *(addr->SrcHost),                                   /* source IP */
+                             *(addr->DstHost),                              /* destination IP */
                              NULL,                                       /* payload */
                              0,                                          /* payload size */
                              myPacket,                                   /* libnet handle */
