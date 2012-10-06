@@ -143,6 +143,7 @@ int main (int argc, char *argv[])
     /* Clean up */
     libnet_clear_packet(myPacket);
     libnet_destroy(myPacket);
+    free(addr);
     
     return 0;
 }
