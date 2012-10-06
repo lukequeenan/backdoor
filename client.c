@@ -11,10 +11,8 @@ int main (int argc, char *argv[])
         systemFatal("You need to be root for this");
         exit(0);
     }
-	setgid(0);
 
 	/* Call the rest of the code */
-    
     client();
     
     /* Exit */
@@ -39,7 +37,8 @@ int client()
     }
     
     /* Find a suitable nic from the device list */
-    for (nic = nics; nic; nic = nic->next) {
+    for (nic = nics; nic; nic = nic->next)
+    {
         if (pcap_lookupnet(nic->name, &net, &mask, errorBuffer) != -1)
         {
             break;

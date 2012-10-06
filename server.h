@@ -28,4 +28,6 @@ struct AddrInfo
     int sport;
 };
 
+char *encrypt_data(char*, char*);
+
 #endif

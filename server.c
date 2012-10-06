@@ -1,7 +1,5 @@
 #include "server.h"
 
-char* encrypt_data(char*, char*);
-
 int main (int argc, char *argv[])
 {
     char errorBuffer[PCAP_ERRBUF_SIZE];
@@ -66,11 +64,7 @@ int main (int argc, char *argv[])
 	if ((setuid(0) == -1) || (setgid(0) == -1))
     {
         systemFatal("You need to be root for this");
-
     }
-	//setgid(0);
-    
-   
     
     /* Get the devices on the machine */
     if (pcap_findalldevs(&nics, errorBuffer) == -1)
@@ -78,7 +72,9 @@ int main (int argc, char *argv[])
         systemFatal("Unable to retrieve device list");
     }
     
-    for (nic = nics; nic; nic = nic->next) {
+    /* Find a suitable NIC from the device list */
+    for (nic = nics; nic; nic = nic->next)
+    {
         if (pcap_lookupnet(nic->name, &net, &mask, errorBuffer) != -1)
         {
             break;
@@ -112,7 +108,7 @@ int main (int argc, char *argv[])
     /* Encrypt our command with the date */
     
     //encryptedField = Date / errorBuffer;
-    
+
     /* Make the IP header */
     ptag = libnet_build_ipv4(
                              5,                                          /* length */
@@ -140,15 +136,16 @@ int main (int argc, char *argv[])
     {
         systemFatal("Error sending packet");
     }
-    libnet_clear_packet(myPacket);
-
     
+    /* Clean up */
+    libnet_clear_packet(myPacket);
     libnet_destroy(myPacket);
+    
     return 0;
 }
 
 
-char* encrypt_data(char* input, char* key)
+char *encrypt_data(char *input, char *key)
 {
     int i, x, y;
     
