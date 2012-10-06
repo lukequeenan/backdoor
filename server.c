@@ -34,7 +34,7 @@ int main (int argc, char *argv[])
     ptag = libnet_build_udp(
                             htons(69),    /* source port */
                             htons(69),    /* destination port */
-                            32,           /* packet size */
+                            LIBNET_UDP_H, /* packet size */
                             0,            /* checksum */
                             NULL,         /* payload */
                             0,            /* payload size */
@@ -47,21 +47,8 @@ int main (int argc, char *argv[])
         systemFatal("Error making UDP packet");
     }
     
-    /* Make the IP header */
-    ptag = libnet_build_ipv4(
-                             5,                                          /* length */
-                             0,                                          /* TOS */
-                             (int)(255.0 * rand() / RAND_MAX + 1.0),     /* IP ID */
-                             0,                                          /* IP Frag */
-                             64,                                         /* TTL */
-                             IPPROTO_UDP,                                /* protocol */
-                             0,                                          /* checksum */
-                             192,                                   /* source IP */
-                             123,                              /* destination IP */
-                             NULL,                                       /* payload */
-                             0,                                          /* payload size */
-                             myPacket,                                   /* libnet handle */
-                             0);                                         /* libnet id */
+    ptag = libnet_autobuild_ipv4(LIBNET_IPV4_H + LIBNET_UDP_H, IPPROTO_UDP, host_convert("192.168.0.89"), myPacket);
+    
     
     /* Error check */
     if (ptag == -1)

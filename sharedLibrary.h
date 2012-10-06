@@ -77,7 +77,7 @@ struct header_udp {
     u_short uh_sum;                 /* checksum */
 };
 
-unsigned int host_convert (char *hostname);
+unsigned int host_convert(char *hostname);
 void systemFatal(const char *message);
 
 #endif
