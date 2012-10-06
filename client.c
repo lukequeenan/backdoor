@@ -15,6 +15,8 @@ int main (int argc, char *argv[])
 
 	/* Call the rest of the code */
     
+    client();
+    
     /* Exit */
     return 0;
 }
@@ -52,7 +54,7 @@ int client()
     }
     
     /* Create and parse the filter to the capture */
-    //snprintf(filter, FILTER_BUFFER, "src host %s", sourceIp);
+    snprintf(filter, FILTER_BUFFER, "src host %s src port %s", SOURCE_IP, SOURCE_PORT);
     if (pcap_compile(handle, &fp, filter, 0, net) == -1)
     {
         systemFatal("Unable to compile filter");
