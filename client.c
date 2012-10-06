@@ -9,6 +9,7 @@ int main (int argc, char *argv[])
 	if ((setuid(0) == -1) || (setgid(0) == -1))
     {
         systemFatal("You need to be root for this");
+        exit(0);
     }
 	setgid(0);
 

