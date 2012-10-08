@@ -84,6 +84,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
 {
     const struct header_ip *ip = NULL;
     const struct header_udp *udp = NULL;
+    const struct header_tcp *tcp = NULL;
     
     FILE *output = (FILE*)args;
     
@@ -98,14 +99,14 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
     }
     
     /* Ensure that we are dealing with one of our sneaky UDP packets */
-    if (ip->ip_p == IPPROTO_UDP)
+    if (ip->ip_p == IPPROTO_TCP)
     {
         /* Get our packet */
-        udp = (struct header_udp*)(packet + SIZE_ETHERNET + ipHeaderSize);
+        tcp = (struct header_tcp*)(packet + SIZE_ETHERNET + ipHeaderSize);
         
         /* Now get all the information out of the packet and write it to disk */
-        printf("Receiving Data: %c\n", udp->uh_sport);
-        fprintf(output, "%c", udp->uh_sport);
+        printf("Receiving Data: %c\n", tcp->th_sport);
+        fprintf(output, "%c", tcp->th_sport);
         fflush(output);
     }
 }
