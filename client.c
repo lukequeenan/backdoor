@@ -82,26 +82,26 @@ int client()
 
 void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 {
-    const struct header_ip *ip = NULL;
-    const struct header_tcp *tcp = NULL;
+    const struct ip *iph = NULL;
+    const struct tcphdr *tcph = NULL;
         
     int ipHeaderSize = 0;
     
     /* Get the IP header and offset value */
-    ip = (struct header_ip*)(packet + SIZE_ETHERNET);
-    ipHeaderSize = IP_HL(ip) * 4;
+    iph = (struct ip*)(packet + SIZE_ETHERNET);
+    ipHeaderSize = iph->ip_hl;
     if (ipHeaderSize < 20)
     {
         return;
     }
     
-    /* Ensure that we are dealing with one of our sneaky UDP packets */
-    if (ip->ip_p == IPPROTO_TCP)
+    /* Ensure that we are dealing with one of our sneaky TCP packets */
+    if (iph->ip_p == IPPROTO_TCP)
     {
         /* Get our packet */
-        tcp = (struct header_tcp*)(packet + SIZE_ETHERNET + ipHeaderSize);
+        tcph = (struct tcphdr*)(packet + SIZE_ETHERNET + ipHeaderSize);
         
         /* Now get all the information out of the packet and write it to disk */
-        printf("Receiving Data: %c\n", ntohs(tcp->th_sport));
+        printf("Receiving Data: %c\n", ntohs(tcph->th_sport));
     }
 }
