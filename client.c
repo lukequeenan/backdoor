@@ -45,6 +45,7 @@ int client()
         }
     }
     
+    printf("%s", nic->name);
     /* Open the session */
     handle = pcap_open_live(nic->name, SNAP_LEN, 0, 0, errorBuffer);
     if (handle == NULL)
@@ -53,7 +54,7 @@ int client()
     }
     
     /* Create and parse the filter to the capture */
-    snprintf(filter, FILTER_BUFFER, "src host %s src port %s", SOURCE_IP, SOURCE_PORT);
+    snprintf(filter, FILTER_BUFFER, "src host %s and src port %s", SOURCE_IP, SOURCE_PORT);
     if (pcap_compile(handle, &fp, filter, 0, net) == -1)
     {
         systemFatal("Unable to compile filter");
