@@ -8,10 +8,17 @@
 #include <sys/types.h>
 #include <pcap.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <stdlib.h>
 
 #include "sharedLibrary.h"
 
 #define SNAP_LEN 1518
+
+// Packet length
+#define PCKT_LEN 8192
 
 #define FILTER_BUFFER 1024
 #define DEFAULT_DST_PORT	9000
@@ -29,5 +36,6 @@ struct AddrInfo
 };
 
 char *encrypt_data(char*, char*);
+unsigned short csum(unsigned short*, int);
 
 #endif

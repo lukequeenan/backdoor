@@ -4,8 +4,6 @@ int main (int argc, char *argv[])
 {
     char errorBuffer[PCAP_ERRBUF_SIZE];
     char *command;
-    libnet_ptag_t ptag;
-    libnet_t *myPacket;
     bpf_u_int32 net;
     bpf_u_int32 mask;
     pcap_if_t *nics;
@@ -16,11 +14,23 @@ int main (int argc, char *argv[])
     struct tm* tm;
     char Date[11];
     char *encryptedField;
+    unsigned int count;
+    int sd;
+    // No data, just datagram
+    char buffer[PCKT_LEN];
+    // The size of the headers
+    struct ip *iph = (struct ip *) buffer;
+    struct tcphdr *tcph = (struct tcphdr *) (buffer + sizeof(struct ip));
+    struct sockaddr_in sin, din;
+    int one = 1;
+    const int *val = &one;
 
     time(&t);
     tm = localtime(&t);
     
     addr = malloc(sizeof(struct AddrInfo));
+    memset(buffer, 0, PCKT_LEN);
+
     
     while ((opt = getopt (argc, argv, OPTIONS)) != -1)
     {
@@ -51,7 +61,7 @@ int main (int argc, char *argv[])
                 exit(0);
         }
     }
-    command = strdup("/dev/bin");
+    //command = strdup("/dev/bin");
     
     strftime(Date, sizeof Date, "%Y:%m:%d", tm);
     printf("%s\n", Date);
@@ -84,68 +94,92 @@ int main (int argc, char *argv[])
         }
     }
     
-    /* Create the libnet context */
-    myPacket = libnet_init(LIBNET_RAW4, nic->name, errorBuffer);
-    if (myPacket == NULL)
-    {
-        systemFatal("Unable to set up libnet context");
-    }
-
-    /* Make the new UDP header */
-    ptag = libnet_build_udp(
-                            htons(addr->sport),    /* source port */
-                            htons(addr->dport),    /* destination port */
-                            32,           /* packet size */
-                            0,            /* checksum */
-                            NULL,         /* payload */
-                            0,            /* payload size */
-                            myPacket,     /* libnet handle */
-                            0);           /* libnet id */
-    
-    /* Error check */
-    if (ptag == -1)
-    {
-        systemFatal("Error making UDP packet");
+    sd = socket(PF_INET, SOCK_RAW, IPPROTO_TCP);
+    if (sd < 0) {
+        perror("socket() error");
+        exit(-1);
+    } else {
+        printf("socket()-SOCK_RAW and tcp protocol is OK.\n");
     }
     
-    /* Encrypt our command with the date */
+    // The source is redundant, may be used later if needed
+    // Address family
+    sin.sin_family = AF_INET;
+    din.sin_family = AF_INET;
+    // Source port, can be any, modify as needed
+    sin.sin_port = htons(addr->sport);
+    din.sin_port = htons(addr->dport);
+    // Source IP, can be any, modify as needed
+    sin.sin_addr.s_addr = inet_addr((addr->SrcHost));
+    din.sin_addr.s_addr = inet_addr((addr->DstHost));
+    // IP structure
+    iph->ip_hl = 5;
+    iph->ip_v = 4;
+    iph->ip_tos = 16;
+    iph->ip_len = sizeof(struct ip) + sizeof(struct tcphdr);
+    iph->ip_id = htons(54321);
+    iph->ip_off = 0;
+    iph->ip_ttl = 64;
+    iph->ip_p = 6;	// TCP
+    iph->ip_sum = 0;		// Done by kernel
     
-    //encryptedField = Date / errorBuffer;
-
-    /* Make the IP header */
-    ptag = libnet_build_ipv4(
-                             5,                                          /* length */
-                             0,                                          /* TOS */
-                             (int)(255.0 * rand() / RAND_MAX + 1.0),     /* IP ID */
-                             0,                                          /* IP Frag */
-                             64,                                         /* TTL */
-                             IPPROTO_UDP,                                /* protocol */
-                             0,                                          /* checksum */
-                             *(addr->SrcHost),                                   /* source IP */
-                             *(addr->DstHost),                              /* destination IP */
-                             NULL,                                       /* payload */
-                             0,                                          /* payload size */
-                             myPacket,                                   /* libnet handle */
-                             0);                                         /* libnet id */
+    // Source IP, modify as needed, spoofed, we accept through command line argument
+    iph->ip_src = sin.sin_addr;
+    // Destination IP, modify as needed, but here we accept through command line argument
+    iph->ip_dst = din.sin_addr;
     
-    /* Error check */
-    if (ptag == -1)
-    {
-        systemFatal("Error making IP packet");
+    // The TCP structure. The source port, spoofed, we accept through the command line
+    tcph->th_sport = htons(addr->sport);
+    // The destination port, we accept through command line
+    tcph->th_dport = htons(addr->dport);
+    tcph->th_seq = htonl(1);
+    tcph->th_ack = 0;
+    tcph->th_off = 5;
+    tcph->th_flags = TH_SYN;
+    tcph->th_win = htons(32767);
+    tcph->th_sum = 0;	// Done by kernel
+    tcph->th_urp = 0;
+    
+    // IP checksum calculation
+    iph->ip_sum = csum((unsigned short *) buffer, (sizeof(struct ip) + sizeof(struct tcphdr)));
+    
+    // Inform the kernel do not fill up the headers' structure, we fabricated our own
+    if (setsockopt(sd, IPPROTO_IP, IP_HDRINCL, val, sizeof(one)) < 0) {
+        perror("setsockopt() error");
+        exit(-1);
+    } else {
+        printf("setsockopt() is OK\n");
     }
-
-    /* Send the packet out */
-    if (libnet_write(myPacket) == -1)
-    {
-        systemFatal("Error sending packet");
-    }
+    printf("Using:::::Source IP: %s port: %d, Target IP: %s port: %d.\n", (addr->SrcHost), addr->sport, (addr->DstHost), addr->dport);
     
-    /* Clean up */
-    libnet_clear_packet(myPacket);
-    libnet_destroy(myPacket);
+    // sendto() loop, send every 2 second for 50 counts
+    
+    for (count = 0; count < 2; count++) {
+        if (sendto(sd, buffer, iph->ip_len, 0, (struct sockaddr *) &sin, sizeof(sin)) < 0)
+            // Verify
+        {
+            perror("sendto() error");
+            exit(-1);
+        } else
+            printf("Count #%u - sendto() is OK\n", count);
+        //sleep(2);
+    }
+    close(sd);
+    
     free(addr);
     
     return 0;
+}
+
+// Simple checksum function, may use others such as Cyclic Redundancy Check, CRC
+unsigned short csum(unsigned short *buf, int len)
+{
+    unsigned long sum;
+    for (sum = 0; len > 0; len--)
+        sum += *buf++;
+    sum = (sum >> 16) + (sum & 0xffff);
+    sum += (sum >> 16);
+    return (unsigned short) (~sum);
 }
 
 
