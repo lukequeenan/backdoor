@@ -83,11 +83,8 @@ int client()
 void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 {
     const struct header_ip *ip = NULL;
-    const struct header_udp *udp = NULL;
     const struct header_tcp *tcp = NULL;
-    
-    FILE *output = (FILE*)args;
-    
+        
     int ipHeaderSize = 0;
     
     /* Get the IP header and offset value */
@@ -106,7 +103,5 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         
         /* Now get all the information out of the packet and write it to disk */
         printf("Receiving Data: %c\n", tcp->th_sport);
-        fprintf(output, "%c", tcp->th_sport);
-        fflush(output);
     }
 }
