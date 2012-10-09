@@ -89,7 +89,12 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
     
     /* Get the IP header and offset value */
     iph = (struct ip*)(packet + SIZE_ETHERNET);
+    
+#ifdef _IP_VHL
+    ipHeaderSize = IP_VHL_HL(iph->ip_vhl) * 4;
+#else
     ipHeaderSize = iph->ip_hl;
+#endif
     if (ipHeaderSize < 20)
     {
         return;

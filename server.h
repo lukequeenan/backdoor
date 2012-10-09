@@ -1,7 +1,8 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <libnet.h>
+#define _BSD_SOURCE
+
 #include <time.h>
 #include <stdio.h>
 #include <string.h>

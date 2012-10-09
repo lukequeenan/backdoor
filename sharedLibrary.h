@@ -1,9 +1,6 @@
 #ifndef SHARED_LIBRARY_H
 #define SHARED_LIBRARY_H
 
-//#define __USE_BSD
-//#define __FAVOR_BSD
-
 #include <arpa/inet.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>

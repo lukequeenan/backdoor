@@ -1,6 +1,8 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#define _BSD_SOURCE
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
