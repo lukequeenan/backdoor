@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -W -Wall -g
-SERVER_FLAGS = -lnet -lpcap
+SERVER_FLAGS = -lpcap
 CLIENT_FLAGS = -lpcap
 
 SERVER = server.out

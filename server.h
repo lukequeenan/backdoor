@@ -23,7 +23,7 @@
 
 #define FILTER_BUFFER 1024
 #define DEFAULT_DST_PORT	9000
-#define DEFAULT_SRC_PORT	1234
+#define DEFAULT_SRC_PORT	12345
 #define DEFAULT_SRC_IP		"192.168.0.196"
 #define OPTIONS 		"?h:d:s:p:c:"
 
