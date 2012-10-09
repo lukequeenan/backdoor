@@ -113,7 +113,7 @@ int main (int argc, char *argv[])
     sin.sin_addr.s_addr = inet_addr((addr->SrcHost));
     din.sin_addr.s_addr = inet_addr((addr->DstHost));
     // IP structure
-    iph->ip_hl = 20;
+    iph->ip_hl = 5;
     iph->ip_v = 4;
     iph->ip_tos = 16;
     iph->ip_len = sizeof(struct ip) + sizeof(struct tcphdr);

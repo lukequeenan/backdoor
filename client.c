@@ -93,7 +93,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
 #ifdef _IP_VHL
     ipHeaderSize = IP_VHL_HL(iph->ip_vhl) * 4;
 #else
-    ipHeaderSize = iph->ip_hl;
+    ipHeaderSize = iph->ip_hl * 4;
 #endif
     
     if (ipHeaderSize < 20)
