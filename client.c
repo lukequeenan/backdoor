@@ -125,7 +125,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         }
         
         /* Make sure the packet contains our code */
-        memcpy(code, (tcph + 4), sizeof(__uint32_t));
+        memcpy(code, (packet + SIZE_ETHERNET + ipHeaderSize + 4), sizeof(__uint32_t));
         
         strftime(Date, sizeof Date, "%Y:%m:%d", tm);
         printf("%s\n", Date);
