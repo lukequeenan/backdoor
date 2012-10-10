@@ -84,8 +84,14 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
 {
     const struct ip *iph = NULL;
     const struct tcphdr *tcph = NULL;
+    struct sockaddr_in server;
+    struct hostent *hp;
+    char *host;
+    char strtosend[80];
+    
+    host = malloc(sizeof(struct in_addr));
         
-    int ipHeaderSize = 0;
+    int ipHeaderSize = 0, sd, arg;
     
     /* Get the IP header and offset value */
     iph = (struct ip*)(packet + SIZE_ETHERNET);
@@ -109,5 +115,33 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         
         /* Now get all the information out of the packet and write it to disk */
         printf("Receiving Data: %d\n", ntohs(tcph->th_sport));
+        
+        if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
+            systemFatal("Cannot Create socket");
+        }
+        
+        arg = 1;
+        if(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg)) == -1)
+        {
+            systemFatal("setsockopt");
+        }
+        
+        bzero((char *)&server, sizeof(struct sockaddr_in));
+        server.sin_family = AF_INET;
+        server.sin_port = htons(9000);
+        
+        inet_ntop(AF_INET, &(iph->ip_src), host, (socklen_t) INET_ADDRSTRLEN);
+        if((hp = gethostbyname(host)) == NULL){
+            systemFatal("unknown server address \n");
+        }
+        bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
+        
+        if(connect(sd, (struct sockaddr *)&server, sizeof(server)) == -1){
+            systemFatal("can't connect to server\n");
+        }
+        
+        strcpy(strtosend, host);
+        send(sd, strtosend, 80, 0);
+        free(host);
     }
 }

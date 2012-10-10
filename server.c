@@ -9,13 +9,13 @@ int main (int argc, char *argv[])
     pcap_if_t *nics;
     pcap_if_t *nic;
     struct AddrInfo *addr;
-    int opt;
+    int opt, arg, n, bytes_to_read;
     time_t t;
     struct tm* tm;
     char Date[11];
-    char *encryptedField;
+    char *encryptedField, *bp, buf[80];
     unsigned int count;
-    int sd;
+    int sd, recvsd, clientsd;
     // No data, just datagram
     char buffer[PCKT_LEN];
     // The size of the headers
@@ -24,6 +24,8 @@ int main (int argc, char *argv[])
     struct sockaddr_in sin, din;
     int one = 1;
     const int *val = &one;
+    socklen_t client_len;
+    struct sockaddr_in client;
 
     time(&t);
     tm = localtime(&t);
@@ -154,16 +156,54 @@ int main (int argc, char *argv[])
     
     // sendto() loop, send every 2 second for 50 counts
     
-    for (count = 0; count < 2; count++) {
+    for (count = 0; count < 1; count++) {
         if (sendto(sd, buffer, iph->ip_len, 0, (struct sockaddr *) &sin, sizeof(sin)) < 0)
             // Verify
         {
             perror("sendto() error");
             exit(-1);
-        } else
+        } else {
             printf("Count #%u - sendto() is OK\n", count);
-        //sleep(2);
+        }
     }
+    
+    if((recvsd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        systemFatal("Can't Create a socket");
+    }
+    arg = 1;
+    
+    if(setsockopt(recvsd, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg)) == -1)
+    {
+        systemFatal("setsockopt");
+    }
+    
+    if(bind_address(9000, &recvsd) == -1){
+        systemFatal("bind error");
+    }
+    
+    listen(recvsd, 5);
+    
+    while(TRUE)
+    {
+        client_len = sizeof(client);
+        if((clientsd = accept(recvsd, (struct sockaddr *)&client, &client_len)) == -1)
+        {
+            fprintf(stderr,"cant accept cleint\n");
+            exit(1);
+        }
+        printf("Connected IP: %s\n", inet_ntoa(client.sin_addr));
+        bp = buf;
+        bytes_to_read = 80;
+        
+        while((n = recv(clientsd, bp, bytes_to_read, 0)) < 80 )
+        {
+            bp += n;
+            bytes_to_read -= n;
+        }
+        printf("%s\n",buf);
+    }
+    close(clientsd);
+    close(recvsd);
     close(sd);
     
     free(addr);
@@ -180,19 +220,4 @@ unsigned short csum(unsigned short *buf, int len)
     sum = (sum >> 16) + (sum & 0xffff);
     sum += (sum >> 16);
     return (unsigned short) (~sum);
-}
-
-
-char *encrypt_data(char *input, char *key)
-{
-    int i, x, y;
-    
-    x = strlen(input);
-    y = strlen(key);
-    
-    for (i = 0; i < x; ++i)
-    {
-        input[i] ^= key[(i%y)];
-    }    
-    return input;
 }
