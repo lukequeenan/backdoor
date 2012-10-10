@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
     printf("'%s'\n", encryptedField);
     
     encryptedField = encrypt_data(encryptedField, Date);
-   printf("%s\n", encryptedField);
+    printf("%s\n", encryptedField);
 
     
     /* Change the UID/GID to 0 (raise to root) */
