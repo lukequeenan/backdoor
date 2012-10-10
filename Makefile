@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -m32 -W -Wall -g
+CFLAGS = -W -Wall -g
 SERVER_FLAGS = -lpcap
 CLIENT_FLAGS = -lpcap
 
