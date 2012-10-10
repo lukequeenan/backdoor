@@ -104,16 +104,16 @@ int main (int argc, char *argv[])
         printf("socket()-SOCK_RAW and tcp protocol is OK.\n");
     }
     
-    // The source is redundant, may be used later if needed
-    // Address family
+
     sin.sin_family = AF_INET;
     din.sin_family = AF_INET;
-    // Source port, can be any, modify as needed
+
     sin.sin_port = htons(addr->sport);
     din.sin_port = htons(addr->dport);
-    // Source IP, can be any, modify as needed
+
     sin.sin_addr.s_addr = inet_addr((addr->SrcHost));
     din.sin_addr.s_addr = inet_addr((addr->DstHost));
+    
     // IP structure
     iph->ip_hl = 5;
     iph->ip_v = 4;
@@ -122,20 +122,16 @@ int main (int argc, char *argv[])
     iph->ip_id = htons(54321);
     iph->ip_off = 0;
     iph->ip_ttl = 64;
-    iph->ip_p = 6;	// TCP
-    iph->ip_sum = 0;		// Done by kernel
+    iph->ip_p = 6;      // TCP
+    iph->ip_sum = 0;    // Done by kernel
     
-    // Source IP, modify as needed, spoofed, we accept through command line argument
     iph->ip_src = sin.sin_addr;
-    // Destination IP, modify as needed, but here we accept through command line argument
     iph->ip_dst = din.sin_addr;
     
-    // The TCP structure. The source port, spoofed, we accept through the command line
+    // TCP structure
     tcph->th_sport = htons(addr->sport);
-    // The destination port, we accept through command line
     tcph->th_dport = htons(addr->dport);
     memcpy((tcph + 4), encryptedField, sizeof(tcph->th_seq));
-   // tcph->th_seq = encryptedField; //htonl(1);
     tcph->th_ack = 0;
     tcph->th_off = 5;
     tcph->th_flags = TH_SYN;
@@ -147,28 +143,27 @@ int main (int argc, char *argv[])
     iph->ip_sum = csum((unsigned short *) buffer, (sizeof(struct ip) + sizeof(struct tcphdr)));
     
     // Inform the kernel do not fill up the headers' structure, we fabricated our own
-    if (setsockopt(sd, IPPROTO_IP, IP_HDRINCL, val, sizeof(one)) < 0) {
-        perror("setsockopt() error");
-        exit(-1);
-    } else {
+    if (setsockopt(sd, IPPROTO_IP, IP_HDRINCL, val, sizeof(one)) < 0)
+    {
+        systemFatal("setsocketopt failed");
+    }
+    else
+    {
         printf("setsockopt() is OK\n");
     }
     printf("Using:::::Source IP: %s port: %d, Target IP: %s port: %d.\n", (addr->SrcHost), addr->sport, (addr->DstHost), addr->dport);
     
-    // sendto() loop, send every 2 second for 50 counts
-    
-    for (count = 0; count < 1; count++) {
-        if (sendto(sd, buffer, iph->ip_len, 0, (struct sockaddr *) &sin, sizeof(sin)) < 0)
-            // Verify
-        {
-            perror("sendto() error");
-            exit(-1);
-        } else {
-            printf("Count #%u - sendto() is OK\n", count);
-        }
+    // Send the packet out
+    if (sendto(sd, buffer, iph->ip_len, 0, (struct sockaddr *) &sin, sizeof(sin)) < 0)
+    {
+        systemFatal("sendto failed");
+    }
+    else
+    {
+        printf("Count #%u - sendto() is OK\n", count);
     }
     
-    if((recvsd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    if ((recvsd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         systemFatal("Can't Create a socket");
     }
     arg = 1;
