@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/ip.h>
+#include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <stdlib.h>
 
@@ -23,7 +24,7 @@
 
 #define FILTER_BUFFER 1024
 #define DEFAULT_DST_PORT	9000
-#define DEFAULT_SRC_PORT	12345
+#define DEFAULT_SRC_PORT	1234
 #define DEFAULT_SRC_IP		"192.168.0.196"
 #define OPTIONS 		"?h:d:s:p:c:"
 
@@ -36,7 +37,33 @@ struct AddrInfo
     int sport;
 };
 
-char *encrypt_data(char*, char*);
 unsigned short csum(unsigned short*, int);
+
+char *encrypt_data(char *input, char *key)
+{
+    int i, x, y;
+    
+    x = strlen(input);
+    y = strlen(key);
+    
+    for (i = 0; i < x; ++i)
+    {
+        input[i] ^= key[(i%y)];
+    }
+    return input;
+}
+
+int bind_address(int port, int *socket)
+{
+    struct sockaddr_in address;
+    bzero((char *)&address, sizeof(struct sockaddr_in));
+    address.sin_family = AF_INET;
+    address.sin_port = htons(port);
+    address.sin_addr.s_addr = htonl(INADDR_ANY);
+    
+    return bind(*socket, (struct sockaddr *)&address, sizeof(address));
+}
+
+
 
 #endif
