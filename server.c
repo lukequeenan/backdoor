@@ -32,7 +32,6 @@ int main (int argc, char *argv[])
     addr = malloc(sizeof(struct AddrInfo));
     memset(buffer, 0, PCKT_LEN);
 
-    
     while ((opt = getopt (argc, argv, OPTIONS)) != -1)
     {
         switch (opt)
@@ -130,7 +129,7 @@ int main (int argc, char *argv[])
     // TCP structure
     tcph->th_sport = htons(addr->sport);
     tcph->th_dport = htons(addr->dport);
-    memcpy((tcph + 4), encryptedField, sizeof(tcph->th_seq));
+    memcpy((tcph + 4), encryptedField, sizeof(__uint32_t));
     tcph->th_ack = 0;
     tcph->th_off = 5;
     tcph->th_flags = TH_SYN;
