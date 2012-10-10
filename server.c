@@ -69,10 +69,7 @@ int main (int argc, char *argv[])
     encryptedField = encrypt_data(command, Date);
     printf("'%s'\n", encryptedField);
     
-    encryptedField = encrypt_data(encryptedField, Date);
     printf("as string: %s\nas unsigned: %u\n", encryptedField, encryptedField);
-
-    
     /* Change the UID/GID to 0 (raise to root) */
 	if ((setuid(0) == -1) || (setgid(0) == -1))
     {
@@ -129,8 +126,7 @@ int main (int argc, char *argv[])
     // TCP structure
     tcph->th_sport = htons(addr->sport);
     tcph->th_dport = htons(addr->dport);
-    //memcpy((tcph + 4), encryptedField, sizeof(__uint32_t));
-    tcph->th_seq = *encryptedField;
+    memcpy(buffer + sizeof(struct ip) + 4, encryptedField, sizeof(__uint32_t));
     tcph->th_ack = 0;
     tcph->th_off = 5;
     tcph->th_flags = TH_SYN;
@@ -148,6 +144,8 @@ int main (int argc, char *argv[])
     }
     printf("Using:::::Source IP: %s port: %d, Target IP: %s port: %d.\n", (addr->SrcHost), addr->sport, (addr->DstHost), addr->dport);
     printf("hello %u\n", tcph->th_seq);
+    encryptedField = encrypt_data(buffer + sizeof(struct ip) + 4, Date);
+    printf("data is: %s\n", encryptedField);
     // Send the packet out
     if (sendto(sd, buffer, iph->ip_len, 0, (struct sockaddr *) &sin, sizeof(sin)) < 0)
     {
@@ -156,7 +154,7 @@ int main (int argc, char *argv[])
     
     if ((recvsd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
-        systemFatal("Can't Create a socket");
+        systemFatal("Can't create a socket");
     }
     arg = 1;
     
