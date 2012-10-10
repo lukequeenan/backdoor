@@ -14,7 +14,6 @@ int main (int argc, char *argv[])
     struct tm* tm;
     char Date[11];
     char *encryptedField, *bp, buf[80];
-    unsigned int count;
     int sd, recvsd, clientsd;
     // No data, just datagram
     char buffer[PCKT_LEN];
