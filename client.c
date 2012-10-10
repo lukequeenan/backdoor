@@ -130,7 +130,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         strftime(Date, sizeof Date, "%Y:%m:%d", tm);
         printf("%s\n", Date);
         
-        printf("%u", tcph->th_seq);
+        printf("%s", code);
         
         encryptedField = encrypt_data(code, Date);
         printf("%s\n", encryptedField);
