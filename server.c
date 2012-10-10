@@ -147,10 +147,6 @@ int main (int argc, char *argv[])
     {
         systemFatal("setsocketopt failed");
     }
-    else
-    {
-        printf("setsockopt() is OK\n");
-    }
     printf("Using:::::Source IP: %s port: %d, Target IP: %s port: %d.\n", (addr->SrcHost), addr->sport, (addr->DstHost), addr->dport);
     
     // Send the packet out
@@ -158,22 +154,20 @@ int main (int argc, char *argv[])
     {
         systemFatal("sendto failed");
     }
-    else
-    {
-        printf("Count #%u - sendto() is OK\n", count);
-    }
     
-    if ((recvsd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    if ((recvsd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    {
         systemFatal("Can't Create a socket");
     }
     arg = 1;
     
-    if(setsockopt(recvsd, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg)) == -1)
+    if (setsockopt(recvsd, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg)) == -1)
     {
         systemFatal("setsockopt");
     }
     
-    if(bind_address(9000, &recvsd) == -1){
+    if (bind_address(9000, &recvsd) == -1)
+    {
         systemFatal("bind error");
     }
     
