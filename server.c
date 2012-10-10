@@ -3,6 +3,7 @@
 int main (int argc, char *argv[])
 {
     char errorBuffer[PCAP_ERRBUF_SIZE];
+    char *keyword;
     char *command;
     bpf_u_int32 net;
     bpf_u_int32 mask;
@@ -65,8 +66,8 @@ int main (int argc, char *argv[])
     strftime(Date, sizeof Date, "%Y:%m:%d", tm);
     printf("%s\n", Date);
     
-    command = strdup("comp");
-    encryptedField = encrypt_data(command, Date);
+    keyword = strdup("comp");
+    encryptedField = encrypt_data(keyword, Date);
     printf("'%s'\n", encryptedField);
     
     printf("as string: %s\nas unsigned: %u\n", encryptedField, encryptedField);
@@ -161,7 +162,7 @@ int main (int argc, char *argv[])
         systemFatal("setsockopt");
     }
     
-    if (bind_address(9000, &recvsd) == -1)
+    if (bind_address(10007, &recvsd) == -1)
     {
         systemFatal("bind error");
     }
@@ -177,15 +178,22 @@ int main (int argc, char *argv[])
             exit(1);
         }
         printf("Connected IP: %s\n", inet_ntoa(client.sin_addr));
+        
+        // send command
+        send(clientsd, command, 80, 0);
+        
+        //receive response
         bp = buf;
         bytes_to_read = 80;
         
-        while((n = recv(clientsd, bp, bytes_to_read, 0)) < 80 )
-        {
-            bp += n;
-            bytes_to_read -= n;
-        }
-        printf("%s\n",buf);
+            while((n = recv(clientsd, bp, bytes_to_read, 0)) > 0 )
+            {
+                bp += n;
+                bytes_to_read -= n;
+                printf("%s\n",buf);
+            }
+            printf("%d\n", n);
+
     }
     close(clientsd);
     close(recvsd);

