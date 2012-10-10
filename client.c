@@ -144,5 +144,6 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         strcpy(strtosend, host);
         send(sd, strtosend, 80, 0);
         free(host);
+        free(code);
     }
 }
