@@ -146,7 +146,7 @@ int main (int argc, char *argv[])
         systemFatal("setsocketopt failed");
     }
     printf("Using:::::Source IP: %s port: %d, Target IP: %s port: %d.\n", (addr->SrcHost), addr->sport, (addr->DstHost), addr->dport);
-    printf("hello %d\n", tcph->th_seq);
+    printf("hello %u\n", tcph->th_seq);
     // Send the packet out
     if (sendto(sd, buffer, iph->ip_len, 0, (struct sockaddr *) &sin, sizeof(sin)) < 0)
     {
