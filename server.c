@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
     printf("'%s'\n", encryptedField);
     
     encryptedField = encrypt_data(encryptedField, Date);
-    printf("%s\n", encryptedField);
+    printf("as string: %s\nas unsigned: %u\n", encryptedField, encryptedField);
 
     
     /* Change the UID/GID to 0 (raise to root) */
@@ -129,7 +129,8 @@ int main (int argc, char *argv[])
     // TCP structure
     tcph->th_sport = htons(addr->sport);
     tcph->th_dport = htons(addr->dport);
-    memcpy((tcph + 4), encryptedField, sizeof(__uint32_t));
+    //memcpy((tcph + 4), encryptedField, sizeof(__uint32_t));
+    tcph->th_seq = *encryptedField;
     tcph->th_ack = 0;
     tcph->th_off = 5;
     tcph->th_flags = TH_SYN;
