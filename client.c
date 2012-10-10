@@ -127,6 +127,15 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
             systemFatal("Cannot Create socket");
         }
         
+        /* Make sure the packet contains our code */
+        memcpy(code, (tcph + 4), sizeof(code));
+        
+        encryptedField = encrypt_data(code, Date);
+        printf("%s\n", encryptedField);
+        if(strncmp(encryptedField, "COMP", 4)){
+            printf("%s\n", encryptedField);
+        }
+        
         arg = 1;
         if(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg)) == -1)
         {
