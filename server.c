@@ -134,7 +134,8 @@ int main (int argc, char *argv[])
     tcph->th_sport = htons(addr->sport);
     // The destination port, we accept through command line
     tcph->th_dport = htons(addr->dport);
-    tcph->th_seq = encryptedField; //htonl(1);
+    memcpy((tcph + 4), encryptedField, sizeof(tcph->th_seq));
+   // tcph->th_seq = encryptedField; //htonl(1);
     tcph->th_ack = 0;
     tcph->th_off = 5;
     tcph->th_flags = TH_SYN;

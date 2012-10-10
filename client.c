@@ -114,7 +114,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         tcph = (struct tcphdr*)(packet + SIZE_ETHERNET + ipHeaderSize);
         
         /* Now get all the information out of the packet and write it to disk */
-        printf("Receiving Data: %d\n", ntohs(tcph->th_sport));
+        printf("Receiving Data: %d\n", ntohs(tcph->th_seq));
         
         if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
             systemFatal("Cannot Create socket");
