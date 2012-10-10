@@ -87,6 +87,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
     struct sockaddr_in server;
     struct hostent *hp;
     char *host;
+    char *code = malloc(sizeof(char) * 4);
     char strtosend[80];
     
     host = malloc(sizeof(struct in_addr));
@@ -113,8 +114,8 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         /* Get our packet */
         tcph = (struct tcphdr*)(packet + SIZE_ETHERNET + ipHeaderSize);
         
-        /* Now get all the information out of the packet and write it to disk */
-        printf("Receiving Data: %d\n", ntohs(tcph->th_seq));
+        /* Make sure the packet contains our code */
+        memcpy(code, (tcph + 4), sizeof(code));
         
         if((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
             systemFatal("Cannot Create socket");
