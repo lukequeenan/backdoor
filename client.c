@@ -108,6 +108,6 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         tcph = (struct tcphdr*)(packet + SIZE_ETHERNET + ipHeaderSize);
         
         /* Now get all the information out of the packet and write it to disk */
-        printf("Receiving Data: %c\n", ntohs(tcph->th_sport));
+        printf("Receiving Data: %d\n", ntohs(tcph->th_sport));
     }
 }
