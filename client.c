@@ -190,7 +190,6 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
             //send results
             strcpy(strtosend, path);
             send(sd, strtosend, 80, 0);
-            printf("%s\n", path);
         }
         
         /* close */
