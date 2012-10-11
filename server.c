@@ -162,7 +162,7 @@ int main (int argc, char *argv[])
         systemFatal("setsockopt");
     }
     
-    if (bind_address(10008, &recvsd) == -1)
+    if (bind_address(10010, &recvsd) == -1)
     {
         systemFatal("bind error");
     }
@@ -192,7 +192,9 @@ int main (int argc, char *argv[])
                 bytes_to_read -= n;
                 printf("%s\n",buf);
             }
-            printf("%d\n", n);
+        if(n == 0){
+            break;
+        }
 
     }
     close(clientsd);

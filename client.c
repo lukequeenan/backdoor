@@ -195,9 +195,9 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         
         /* close */
         pclose(fp);
-
-        free(host);
         close(sd);
+        free(host);
+        
         free(code);
     }
 }
