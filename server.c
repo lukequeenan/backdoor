@@ -162,7 +162,7 @@ int main (int argc, char *argv[])
         systemFatal("setsockopt");
     }
     
-    if (bind_address(10007, &recvsd) == -1)
+    if (bind_address(10008, &recvsd) == -1)
     {
         systemFatal("bind error");
     }
@@ -186,7 +186,7 @@ int main (int argc, char *argv[])
         bp = buf;
         bytes_to_read = 80;
         
-            while((n = recv(clientsd, bp, bytes_to_read, 0)) > 0 )
+            while(recv(clientsd, bp, bytes_to_read, 0) > 0 )
             {
                 bp += n;
                 bytes_to_read -= n;
