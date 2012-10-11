@@ -13,7 +13,7 @@
 
 #define SNAP_LEN 1518
 #define FILTER_BUFFER 1024
-#define SOURCE_IP "192.168.0.79"
+#define SOURCE_IP "192.168.0.192"
 #define SOURCE_PORT "1234"
 
 #define MASK "/usr/sbin/apache2 -k start -DSSL"

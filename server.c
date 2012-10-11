@@ -168,7 +168,7 @@ void sendCommand(char *command)
         systemFatal("setsockopt");
     }
     
-    if (bind_address(9001, &listenSocket) == -1)
+    if (bind_address(CONNECTION_PORT, &listenSocket) == -1)
     {
         systemFatal("bind error");
     }
