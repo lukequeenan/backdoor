@@ -16,5 +16,17 @@
 #define TRUE 1
 
 void systemFatal(const char *message);
+void reportStatus(const char *message);
+unsigned short csum(unsigned short*, int);
+char *encrypt_data(char *input, char *key);
+int bind_address(int port, int *socket);
+
+struct AddrInfo
+{
+    char *DstHost;
+    char *SrcHost;
+    int dport;
+    int sport;
+};
 
 #endif

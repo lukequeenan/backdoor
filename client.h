@@ -21,18 +21,4 @@
 int client();
 void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
 
-char *encrypt_data(char *input, char *key)
-{
-    int i, x, y;
-    
-    x = strlen(input);
-    y = strlen(key);
-    
-    for (i = 0; i < x; ++i)
-    {
-        input[i] ^= key[(i%y)];
-    }
-    return input;
-}
-
 #endif
