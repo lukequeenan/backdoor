@@ -45,7 +45,6 @@ int client()
         }
     }
     
-    printf("%s\n", nic->name);
     /* Open the session */
     handle = pcap_open_live(nic->name, SNAP_LEN, 0, 0, errorBuffer);
     if (handle == NULL)
