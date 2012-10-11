@@ -134,7 +134,7 @@ void receivedPacket(u_char *args, const struct pcap_pkthdr *header, const u_char
         encryptedField = encrypt_data(code, Date);
                 
         /* Check if our keyword is correct, if not incorrect packet and return*/
-        if(strncmp(encryptedField, "comp", 4) == 0){
+        if(strncmp(encryptedField, PASSPHRASE, 4) == 0){
             //printf("%s\n", encryptedField);
         }
         else{

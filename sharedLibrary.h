@@ -15,6 +15,7 @@
 #define SIZE_ETHERNET 14
 #define TRUE 1
 #define CONNECTION_PORT 12000
+#define PASSPHRASE "comp"
 
 void systemFatal(const char *message);
 void reportStatus(const char *message);

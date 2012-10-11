@@ -1,8 +1,5 @@
 #include "server.h"
 
-#define PASSPHRASE "comp"
-
-
 int main (int argc, char *argv[])
 {
     char *command;
